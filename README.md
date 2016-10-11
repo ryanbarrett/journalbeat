@@ -41,6 +41,64 @@ RHEL or Fedora environment, you need to install the `systemd-devel` package, `li
 **NOTE:** This is not the preferred way from Elastic on how to do it. Needs to
 be revised (of course).
 
+### Ubuntu 16.04
+
+**Install required packages to build**
+
+`sudo apt install libsystemd-dev`
+
+`sudo apt install golang-go`
+
+`nano .bashrc`
+```
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+```
+**open a new shell.**
+
+`go get github.com/mheese/journalbeat`
+
+**Once built, move files to production locations (including other computers)**
+
+`sudo cp ~/go/bin/journalbeat /bin/`
+
+`sudo mkdir -p /etc/journalbeat/ && sudo cp ~/go/src/github.com/mheese/journalbeat/etc/journalbeat.yml /etc/journalbeat/`
+
+**Adjust journalbeat.yml as needed**
+
+`sudo nano /etc/journalbeat/journalbeat.yml`
+
+**Create systemd unit file**
+
+`sudo nano /lib/systemd/system/journalbeat.service`
+
+```
+[Unit]
+Description=JournalBeat service
+
+[Service]
+ExecStart=/bin/journalbeat -c /etc/journalbeat/journalbeat.yml
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
+Alias=journalbeat.service
+```
+
+**Test service**
+
+`sudo systemctl start journalbeat`
+
+`sudo systemctl status journalbeat`
+
+**If everything looks good**
+
+`sudo systemctl enable journalbeat`
+
+
+
+
+
 ## Caveats
 
 A few current caveats with journalbeat
